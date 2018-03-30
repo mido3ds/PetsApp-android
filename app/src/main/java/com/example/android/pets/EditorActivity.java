@@ -15,7 +15,9 @@
  */
 package com.example.android.pets;
 
+import android.content.ContentValues;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -26,8 +28,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.android.pets.Data.PetContract;
+import com.example.android.pets.Data.PetDbHelper;
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -127,7 +131,8 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                // Do nothing for now
+                saveData();
+                finish();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
@@ -140,5 +145,48 @@ public class EditorActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void saveData() {
+        ContentValues values = null; // TODO: check for null and exceptions
+        try {
+            values = getValues();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        PetDbHelper petDbHelper = new PetDbHelper(this);
+        petDbHelper.getWritableDatabase().insert(PetContract.PetEntry.TABLE_NAME, null, values);
+    }
+
+    private ContentValues getValues() throws Exception {
+        ContentValues values = new ContentValues();
+
+        values.put(PetContract.PetEntry.COLUMN_PET_NAME, getName());
+        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, getWeight());
+        values.put(PetContract.PetEntry.COLUMN_PET_BREED, getBreed());
+        values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender);
+
+        return values;
+    }
+
+    @NonNull
+    private String getBreed() {
+        return mBreedEditText.getText().toString();
+    }
+
+    private int getWeight() throws Exception {
+        String weight = mWeightEditText.getText().toString();
+
+        if (weight.equals("")) {
+            throw new Exception("didn't add weight");
+        }
+
+        return Integer.parseInt(weight);
+    }
+
+    @NonNull
+    private String getName() {
+        return mNameEditText.getText().toString();
     }
 }
