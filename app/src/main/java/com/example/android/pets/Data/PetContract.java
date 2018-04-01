@@ -57,5 +57,18 @@ public final class PetContract {
         public static final int GENDER_UNKNOWN = 0;
         public static final int GENDER_MALE = 1;
         public static final int GENDER_FEMALE = 2;
+
+        public static String genderToString(int g) throws Exception {
+            switch (g) {
+                case GENDER_UNKNOWN:
+                    return "Unknown";
+                case GENDER_MALE:
+                    return "Male";
+                case GENDER_FEMALE:
+                    return "Female";
+                default:
+                    throw new Exception("doesn't belong to possible values for the gender of the pet");
+            }
+        }
     }
 }

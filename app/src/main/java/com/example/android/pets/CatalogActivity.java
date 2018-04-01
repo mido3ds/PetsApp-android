@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.pets.Data.PetContract;
 import com.example.android.pets.Data.PetDbHelper;
@@ -70,15 +71,41 @@ public class CatalogActivity extends AppCompatActivity {
     private void displayDatabaseInfo() {
         // Create and/or open a database to read from it
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(PetContract.PetEntry.TABLE_NAME, null, null,
+                null, null, null, null);
 
-        // Perform this raw SQL query "SELECT * FROM pets"
-        // to get a Cursor that contains all rows from the pets table.
-        Cursor cursor = db.rawQuery("SELECT * FROM " + PetContract.PetEntry.TABLE_NAME, null);
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
             TextView displayView = (TextView) findViewById(R.id.text_view_pet);
             displayView.setText("Number of rows in pets database table: " + cursor.getCount());
+            displayView.append(("\n" + "_id" + " " + PetContract.PetEntry.COLUMN_PET_NAME + " " +
+                    PetContract.PetEntry.COLUMN_PET_BREED + " " + PetContract.PetEntry.COLUMN_PET_GENDER +
+                    " " + PetContract.PetEntry.COLUMN_PET_WEIGHT));
+
+            int nameIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_NAME),
+                    breedIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_BREED),
+                    genderIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_GENDER),
+                    weightIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_WEIGHT),
+                    i = 0;
+
+            String name, breed;
+            int weight, gender;
+
+            while (cursor.moveToNext()) {
+                name = cursor.getString(nameIndex);
+                breed = cursor.getString(breedIndex);
+                weight = cursor.getInt(weightIndex);
+                gender = cursor.getInt(genderIndex);
+
+                displayView.append(("\n" + i + " " +
+                    name + " " + breed + " " + PetContract.PetEntry.genderToString(gender) + " " + weight));
+
+                i++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
             // resources and makes it invalid.
