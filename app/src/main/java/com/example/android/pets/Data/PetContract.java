@@ -80,8 +80,16 @@ public final class PetContract {
             }
         }
 
-        public static Boolean isValidGender(int g) {
-            return (g == GENDER_FEMALE || g == GENDER_MALE || g == GENDER_UNKNOWN);
+        public static Boolean isValidGender(Integer g) {
+            return g != null && (g == GENDER_FEMALE || g == GENDER_MALE || g == GENDER_UNKNOWN);
+        }
+
+        public static Boolean isValidWeight(Integer w) {
+            return w != null && w > 0;
+        }
+
+        public static Boolean isValidName(String name) {
+            return name != null && !name.isEmpty();
         }
     }
 }

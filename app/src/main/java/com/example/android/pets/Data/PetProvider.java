@@ -115,7 +115,7 @@ public class PetProvider extends ContentProvider {
      * for that specific row in the database.
      */
     private Uri insertPet(Uri uri, ContentValues values) {
-        sanityCheck(values);
+        doInsertionSanityCheck(values);
 
         final int id = (int) mDbHelper.getWritableDatabase()
                 .insert(PetContract.PetEntry.TABLE_NAME, null, values);
@@ -125,18 +125,19 @@ public class PetProvider extends ContentProvider {
         return ContentUris.withAppendedId(uri, id);
     }
 
-    private void sanityCheck(ContentValues values) {
+    private void doInsertionSanityCheck(ContentValues values) {
         String name = values.getAsString(PetContract.PetEntry.COLUMN_PET_NAME);
-        Integer weight = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_WEIGHT);
-        Integer gender = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
-
-        if (name == null || name.equals("")) {
+        if (!PetContract.PetEntry.isValidName(name)) {
             throw new IllegalArgumentException("pet must have a name");
         }
-        if (weight == null || weight <= 0) {
+
+        Integer weight = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_WEIGHT);
+        if (!PetContract.PetEntry.isValidWeight(weight)) {
             throw new IllegalArgumentException("pet must have a weight grater than zero");
         }
-        if (gender == null || !PetContract.PetEntry.isValidGender(gender)) {
+
+        Integer gender = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
+        if (!PetContract.PetEntry.isValidGender(gender)) {
             throw new IllegalArgumentException("pet must have a valid gender (male, female or unknown");
         }
     }
@@ -146,7 +147,48 @@ public class PetProvider extends ContentProvider {
      */
     @Override
     public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
-        return 0;
+        int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                break;
+            case PET_ID:
+                selection = PetContract.PetEntry._ID + "=?";
+                selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
+                break;
+            default:
+                throw new IllegalArgumentException("updating is not supported for " + uri);
+        }
+
+        doUpdatingSanityCheck(contentValues);
+
+        return mDbHelper.getWritableDatabase().update(PetContract.PetEntry.TABLE_NAME, contentValues,
+                selection, selectionArgs);
+    }
+
+    private void doUpdatingSanityCheck(ContentValues values) {
+        if (!hasAtLeastOneColumn(values)) {
+            throw new IllegalArgumentException("no values given to update");
+        }
+
+        String name = values.getAsString(PetContract.PetEntry.COLUMN_PET_NAME);
+        if (name != null && !PetContract.PetEntry.isValidName(name)) {
+            throw new IllegalArgumentException("pet must have a name");
+        }
+
+        Integer weight = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_WEIGHT);
+        if (weight != null && !PetContract.PetEntry.isValidWeight(weight)) {
+            throw new IllegalArgumentException("pet must have a weight grater than zero");
+        }
+
+        Integer gender = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
+        if (gender != null && !PetContract.PetEntry.isValidGender(gender)) {
+            throw new IllegalArgumentException("pet must have a valid gender (male, female or unknown");
+        }
+    }
+
+    private boolean hasAtLeastOneColumn(ContentValues values) {
+        return values.containsKey(PetContract.PetEntry.COLUMN_PET_NAME) || values.containsKey(PetContract.PetEntry.COLUMN_PET_GENDER)
+        || values.containsKey(PetContract.PetEntry.COLUMN_PET_WEIGHT) || values.containsKey(PetContract.PetEntry.COLUMN_PET_BREED);
     }
 
     /**
