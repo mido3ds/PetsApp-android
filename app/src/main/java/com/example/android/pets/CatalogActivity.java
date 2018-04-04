@@ -35,7 +35,6 @@ import com.example.android.pets.Data.PetDbHelper;
  * Displays list of pets that were entered and stored in the app.
  */
 public class CatalogActivity extends AppCompatActivity {
-    private PetDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,16 +50,11 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-        // and pass the context, which is the current activity.
-        mDbHelper = new PetDbHelper(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
         displayDatabaseInfo();
     }
 
@@ -69,9 +63,7 @@ public class CatalogActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(PetContract.PetEntry.TABLE_NAME, null, null,
+        Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI,
                 null, null, null, null);
 
         try {
@@ -83,11 +75,11 @@ public class CatalogActivity extends AppCompatActivity {
                     PetContract.PetEntry.COLUMN_PET_BREED + " " + PetContract.PetEntry.COLUMN_PET_GENDER +
                     " " + PetContract.PetEntry.COLUMN_PET_WEIGHT));
 
-            int nameIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_NAME),
-                    breedIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_BREED),
-                    genderIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_GENDER),
-                    weightIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_WEIGHT),
-                    i = 0;
+            int nameIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_NAME);
+            int breedIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_BREED);
+            int genderIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_GENDER);
+            int weightIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_WEIGHT);
+            int i = 0;
 
             String name, breed;
             int weight, gender;
@@ -144,8 +136,6 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(PetContract.PetEntry.COLUMN_PET_BREED, "Terrier");
         values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, 7);
 
-        mDbHelper.getWritableDatabase().insert(
-                PetContract.PetEntry.TABLE_NAME,
-                null, values);
+        getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, values);
     }
 }

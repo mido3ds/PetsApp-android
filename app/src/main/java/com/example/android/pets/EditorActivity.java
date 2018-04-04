@@ -148,15 +148,12 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void saveData() {
-        ContentValues values = null; // TODO: check for null and exceptions
         try {
-            values = getValues();
+            getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, getValues());
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-        PetDbHelper petDbHelper = new PetDbHelper(this);
-        petDbHelper.getWritableDatabase().insert(PetContract.PetEntry.TABLE_NAME, null, values);
     }
 
     private ContentValues getValues() throws Exception {
