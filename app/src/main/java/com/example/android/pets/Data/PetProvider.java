@@ -115,12 +115,30 @@ public class PetProvider extends ContentProvider {
      * for that specific row in the database.
      */
     private Uri insertPet(Uri uri, ContentValues values) {
+        sanityCheck(values);
+
         final int id = (int) mDbHelper.getWritableDatabase()
                 .insert(PetContract.PetEntry.TABLE_NAME, null, values);
 
         // Once we know the ID of the new row in the table,
         // return the new URI with the ID appended to the end of it
         return ContentUris.withAppendedId(uri, id);
+    }
+
+    private void sanityCheck(ContentValues values) {
+        String name = values.getAsString(PetContract.PetEntry.COLUMN_PET_NAME);
+        Integer weight = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_WEIGHT);
+        Integer gender = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
+
+        if (name == null || name.equals("")) {
+            throw new IllegalArgumentException("pet must have a name");
+        }
+        if (weight == null || weight <= 0) {
+            throw new IllegalArgumentException("pet must have a weight grater than zero");
+        }
+        if (gender == null || !PetContract.PetEntry.isValidGender(gender)) {
+            throw new IllegalArgumentException("pet must have a valid gender (male, female or unknown");
+        }
     }
 
     /**
