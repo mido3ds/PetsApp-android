@@ -16,13 +16,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CatalogActivity">
+    tools:context=".UI.CatalogActivity">
 
-    <TextView
-        android:id="@+id/text_view_pet"
+    <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/activity_margin"/>
+        android:id="@+id/catalog_list">
+    </ListView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

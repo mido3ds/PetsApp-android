@@ -3,7 +3,6 @@ package com.example.android.pets.Data;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.support.annotation.NonNull;
 
 public final class PetContract {
     public static final String CONTENT_AUTHORITY = "com.example.android.pets";
@@ -72,32 +71,5 @@ public final class PetContract {
 
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/"
                 + CONTENT_AUTHORITY + "/" + PATH_PETS;
-
-        @NonNull
-        public static String genderToString(int g) throws Exception {
-            switch (g) {
-                case GENDER_UNKNOWN:
-                    return "Unknown";
-                case GENDER_MALE:
-                    return "Male";
-                case GENDER_FEMALE:
-                    return "Female";
-                default:
-                    throw new Exception("doesn't belong to possible values for the gender of the pet");
-            }
-        }
-
-        public static Boolean isValidGender(Integer g) {
-            return g != null && (g == GENDER_FEMALE || g == GENDER_MALE || g == GENDER_UNKNOWN);
-        }
-
-        public static Boolean isValidWeight(Integer w) {
-            return w != null && w > 0;
-        }
-
-        @NonNull
-        public static Boolean isValidName(String name) {
-            return name != null && !name.isEmpty();
-        }
     }
 }

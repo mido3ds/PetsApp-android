@@ -129,17 +129,17 @@ public class PetProvider extends ContentProvider {
 
     private void doInsertionSanityCheck(ContentValues values) {
         String name = values.getAsString(PetContract.PetEntry.COLUMN_PET_NAME);
-        if (!PetContract.PetEntry.isValidName(name)) {
+        if (!Pet.isValidName(name)) {
             throw new IllegalArgumentException("pet must have a name");
         }
 
         Integer weight = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_WEIGHT);
-        if (!PetContract.PetEntry.isValidWeight(weight)) {
+        if (!Pet.isValidWeight(weight)) {
             throw new IllegalArgumentException("pet must have a weight grater than zero");
         }
 
         Integer gender = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
-        if (!PetContract.PetEntry.isValidGender(gender)) {
+        if (!Pet.isValidGender(gender)) {
             throw new IllegalArgumentException("pet must have a valid gender (male, female or unknown");
         }
     }
@@ -173,17 +173,17 @@ public class PetProvider extends ContentProvider {
         }
 
         String name = values.getAsString(PetContract.PetEntry.COLUMN_PET_NAME);
-        if (name != null && !PetContract.PetEntry.isValidName(name)) {
+        if (name != null && !Pet.isValidName(name)) {
             throw new IllegalArgumentException("pet must have a name");
         }
 
         Integer weight = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_WEIGHT);
-        if (weight != null && !PetContract.PetEntry.isValidWeight(weight)) {
+        if (weight != null && !Pet.isValidWeight(weight)) {
             throw new IllegalArgumentException("pet must have a weight grater than zero");
         }
 
         Integer gender = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
-        if (gender != null && !PetContract.PetEntry.isValidGender(gender)) {
+        if (gender != null && !Pet.isValidGender(gender)) {
             throw new IllegalArgumentException("pet must have a valid gender (male, female or unknown");
         }
     }

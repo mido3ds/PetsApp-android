@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.pets;
+package com.example.android.pets.UI;
 
-import android.content.ContentValues;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
@@ -30,7 +29,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.android.pets.Data.Pet;
 import com.example.android.pets.Data.PetContract;
+import com.example.android.pets.R;
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -130,12 +131,13 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                saveData();
+                insertPet();
                 finish();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                // Do nothing for now
+                deletePet();
+                finish();
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -146,24 +148,21 @@ public class EditorActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void saveData() {
+    private void deletePet() {
+        // TODO
+    }
+
+    private void insertPet() {
         try {
-            getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, getValues());
+            getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, createPet().createContentValues());
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
-    private ContentValues getValues() throws Exception {
-        ContentValues values = new ContentValues();
-
-        values.put(PetContract.PetEntry.COLUMN_PET_NAME, getName());
-        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, getWeight());
-        values.put(PetContract.PetEntry.COLUMN_PET_BREED, getBreed());
-        values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender);
-
-        return values;
+    private Pet createPet() throws Exception {
+        return (new Pet(getName(), getBreed(), mGender, getWeight()));
     }
 
     @NonNull
