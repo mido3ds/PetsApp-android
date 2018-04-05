@@ -41,6 +41,16 @@ public class CatalogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
 
+        setupFloatingActionButton();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setupListView();
+    }
+
+    private void setupFloatingActionButton() {
         // Setup FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -50,7 +60,9 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
 
+    private void setupListView() {
         // setup listView adapter to show pets
         ListView listView = (ListView) findViewById(R.id.catalog_list);
         Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI, null,
