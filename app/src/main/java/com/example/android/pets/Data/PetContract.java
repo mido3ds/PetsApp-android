@@ -3,16 +3,15 @@ package com.example.android.pets.Data;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 
 public final class PetContract {
-    private PetContract() {
-    }
-
-    private static final String SCHEME = "content://";
     public static final String CONTENT_AUTHORITY = "com.example.android.pets";
     public static final String PATH_PETS = "pets";
+    public static final Uri BASE_CONTENT_URI = Uri.parse(ContentResolver.SCHEME_CONTENT + "://" + CONTENT_AUTHORITY);
 
-    public static final Uri BASE_CONTENT_URI = Uri.parse(SCHEME + CONTENT_AUTHORITY);
+    private PetContract() {
+    }
 
     public static final class PetEntry implements BaseColumns {
 
@@ -74,6 +73,7 @@ public final class PetContract {
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/"
                 + CONTENT_AUTHORITY + "/" + PATH_PETS;
 
+        @NonNull
         public static String genderToString(int g) throws Exception {
             switch (g) {
                 case GENDER_UNKNOWN:
@@ -95,6 +95,7 @@ public final class PetContract {
             return w != null && w > 0;
         }
 
+        @NonNull
         public static Boolean isValidName(String name) {
             return name != null && !name.isEmpty();
         }

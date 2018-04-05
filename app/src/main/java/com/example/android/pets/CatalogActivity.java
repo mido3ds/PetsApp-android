@@ -18,7 +18,6 @@ package com.example.android.pets;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -29,7 +28,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.pets.Data.PetContract;
-import com.example.android.pets.Data.PetDbHelper;
 
 /**
  * Displays list of pets that were entered and stored in the app.
@@ -91,7 +89,7 @@ public class CatalogActivity extends AppCompatActivity {
                 gender = cursor.getInt(genderIndex);
 
                 displayView.append(("\n" + i + " " +
-                    name + " " + breed + " " + PetContract.PetEntry.genderToString(gender) + " " + weight));
+                        name + " " + breed + " " + PetContract.PetEntry.genderToString(gender) + " " + weight));
 
                 i++;
             }
