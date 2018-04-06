@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.example.android.pets.Data.Pet;
 import com.example.android.pets.Data.PetContract;
@@ -65,10 +66,13 @@ public class CatalogActivity extends AppCompatActivity {
     private void setupListView() {
         // setup listView adapter to show pets
         ListView listView = (ListView) findViewById(R.id.catalog_list);
+
         Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI, null,
                 null, null, null);
         PetCursorAdapter adapter = new PetCursorAdapter(this, cursor);
         listView.setAdapter(adapter);
+
+        listView.setEmptyView(findViewById(R.id.empty_view));
     }
 
     @Override
