@@ -15,7 +15,10 @@
  */
 package com.example.android.pets.UI;
 
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -24,7 +27,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 
 import com.example.android.pets.Data.Pet;
 import com.example.android.pets.Data.PetContract;
@@ -33,9 +35,11 @@ import com.example.android.pets.R;
 /**
  * Displays list of pets that were entered and stored in the app.
  */
-public class CatalogActivity extends AppCompatActivity {
-    private static final Pet dummyPet = new Pet("Toto", "Terrier",
-            PetContract.PetEntry.GENDER_MALE, 7);
+public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final Pet dummyPet = new Pet("Toto", "Terrier", PetContract.PetEntry.GENDER_MALE, 7);
+    private final PetCursorAdapter petCursorAdapter = new PetCursorAdapter(this, null);
+    private final LoaderManager loaderManager = getLoaderManager();
+    private final int LOADER_ID = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,12 +47,13 @@ public class CatalogActivity extends AppCompatActivity {
         setContentView(R.layout.activity_catalog);
 
         setupFloatingActionButton();
+        setupListView();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        setupListView();
+        runLoader();
     }
 
     private void setupFloatingActionButton() {
@@ -64,15 +69,18 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     private void setupListView() {
-        // setup listView adapter to show pets
-        ListView listView = (ListView) findViewById(R.id.catalog_list);
-
-        Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI, null,
-                null, null, null);
-        PetCursorAdapter adapter = new PetCursorAdapter(this, cursor);
-        listView.setAdapter(adapter);
-
+        ListView listView = findViewById(R.id.catalog_list);
+        listView.setAdapter(petCursorAdapter);
         listView.setEmptyView(findViewById(R.id.empty_view));
+    }
+
+    private void runLoader() {
+        Loader loader = loaderManager.getLoader(LOADER_ID);
+        if (loader != null && loader.isReset()) {
+            loaderManager.restartLoader(LOADER_ID, null, this);
+        } else {
+            loaderManager.initLoader(LOADER_ID, null, this);
+        }
     }
 
     @Override
@@ -105,5 +113,23 @@ public class CatalogActivity extends AppCompatActivity {
 
     private void insertDummyPet() {
         getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, dummyPet.createContentValues());
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        return new CursorLoader(this, PetContract.PetEntry.CONTENT_URI,
+                null, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        // go and use this cursor
+        petCursorAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // close the last cursor
+        petCursorAdapter.swapCursor(null);
     }
 }
