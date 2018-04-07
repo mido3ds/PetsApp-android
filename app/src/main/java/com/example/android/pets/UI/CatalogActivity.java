@@ -59,7 +59,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
 
     private void setupFloatingActionButton() {
         // Setup FAB to open EditorActivity
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -79,7 +79,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long i) {
                 Intent intent = new Intent(CatalogActivity.this, EditorActivity.class)
                         .putExtra(EditorActivity.PURPOSE, EditorActivity.UPDATE)
-                        .putExtra(EditorActivity.ID, position+1);
+                        .putExtra(EditorActivity.POSITION, position);
                 startActivity(intent);
             }
         });

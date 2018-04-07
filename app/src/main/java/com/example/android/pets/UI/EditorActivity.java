@@ -41,7 +41,7 @@ import com.example.android.pets.R;
 public class EditorActivity extends AppCompatActivity {
 
     // extras keys [& values]
-    public static final String ID = "ID";
+    public static final String POSITION = "POSITION";
     public static final String PURPOSE = "PURPOSE";
     public static final int INSERT = 0;
     public static final int UPDATE = 1;
@@ -81,37 +81,50 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        setupActivity(getIntent().getExtras());
-
         // Find all relevant views that we will need to read user input from
-        mNameEditText = (EditText) findViewById(R.id.edit_pet_name);
-        mBreedEditText = (EditText) findViewById(R.id.edit_pet_breed);
-        mWeightEditText = (EditText) findViewById(R.id.edit_pet_weight);
-        mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
+        mNameEditText = findViewById(R.id.edit_pet_name);
+        mBreedEditText = findViewById(R.id.edit_pet_breed);
+        mWeightEditText = findViewById(R.id.edit_pet_weight);
+        mGenderSpinner = findViewById(R.id.spinner_gender);
 
         setupSpinner();
+        try {
+            setupActivity(getIntent().getExtras());
+        } catch (Exception e) {
+            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
-    private void setupActivity(Bundle extras) {
+    private void setupActivity(Bundle extras) throws Exception {
         purpose = extras.getInt(PURPOSE, INSERT);
-        int id = extras.getInt(ID, -1);
 
         if (purpose == UPDATE) {
-            assert id >= 0;
+            Pet pet = getPetByPosition(extras.getInt(POSITION));
+            fillForm(pet);
 
-            givenUri = Uri.withAppendedPath(PetContract.PetEntry.CONTENT_URI, String.valueOf(id));
+            givenUri = Uri.withAppendedPath(PetContract.PetEntry.CONTENT_URI, String.valueOf(pet.getId()));
             setTitle(R.string.editor_activity_title_edit_pet);
-            fillForm();
-        } else {
+        } else /**INSERT*/ {
             givenUri = PetContract.PetEntry.CONTENT_URI;
             setTitle(R.string.editor_activity_title_new_pet);
         }
     }
 
-    private void fillForm() {
-        Cursor cursor = getContentResolver().query(givenUri, null, null, null, null);
-        Pet pet = new Pet(cursor);
+    private Pet getPetByPosition(int position) throws Exception {
+        Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI, null,
+                null, null, null);
+        if (cursor != null && cursor.moveToPosition(position)) {
+            Pet pet = new Pet(cursor);
+            cursor.close();
 
+            return pet;
+        } else {
+            throw new Exception("can't query pet");
+        }
+    }
+
+    private void fillForm(Pet pet) throws Exception {
         mNameEditText.setText(pet.getName());
         mBreedEditText.setText(pet.getBreed());
         mWeightEditText.setText(String.valueOf(pet.getWeight()));
