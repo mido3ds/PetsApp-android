@@ -15,6 +15,8 @@
  */
 package com.example.android.pets.UI;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
@@ -38,6 +40,16 @@ import com.example.android.pets.R;
  */
 public class EditorActivity extends AppCompatActivity {
 
+    // extras keys [& values]
+    public static final String ID = "ID";
+    public static final String PURPOSE = "PURPOSE";
+    public static final int INSERT = 0;
+    public static final int UPDATE = 1;
+    private static int GENDER_UNKNOWN_INDEX;
+    private static int GENDER_MALE_INDEX;
+    private static int GENDER_FEMALE_INDEX;
+    private int purpose;
+    private Uri givenUri;
     /**
      * EditText field to enter the pet's name
      */
@@ -69,6 +81,8 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
+        setupActivity(getIntent().getExtras());
+
         // Find all relevant views that we will need to read user input from
         mNameEditText = (EditText) findViewById(R.id.edit_pet_name);
         mBreedEditText = (EditText) findViewById(R.id.edit_pet_breed);
@@ -76,6 +90,46 @@ public class EditorActivity extends AppCompatActivity {
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         setupSpinner();
+    }
+
+    private void setupActivity(Bundle extras) {
+        purpose = extras.getInt(PURPOSE, INSERT);
+        int id = extras.getInt(ID, -1);
+
+        if (purpose == UPDATE) {
+            assert id >= 0;
+
+            givenUri = Uri.withAppendedPath(PetContract.PetEntry.CONTENT_URI, String.valueOf(id));
+            setTitle(R.string.editor_activity_title_edit_pet);
+            fillForm();
+        } else {
+            givenUri = PetContract.PetEntry.CONTENT_URI;
+            setTitle(R.string.editor_activity_title_new_pet);
+        }
+    }
+
+    private void fillForm() {
+        Cursor cursor = getContentResolver().query(givenUri, null, null, null, null);
+        Pet pet = new Pet(cursor);
+
+        mNameEditText.setText(pet.getName());
+        mBreedEditText.setText(pet.getBreed());
+        mWeightEditText.setText(String.valueOf(pet.getWeight()));
+
+        int position = getPositionInSpinner(pet.getGender());
+        mGenderSpinner.setSelection(position);
+    }
+
+    private int getPositionInSpinner(int gender) {
+        switch (gender) {
+            case PetContract.PetEntry.GENDER_UNKNOWN:
+                return GENDER_UNKNOWN_INDEX;
+            case PetContract.PetEntry.GENDER_MALE:
+                return GENDER_MALE_INDEX;
+            case PetContract.PetEntry.GENDER_FEMALE:
+                return GENDER_FEMALE_INDEX;
+        }
+        return gender;
     }
 
     /**
@@ -115,6 +169,10 @@ public class EditorActivity extends AppCompatActivity {
                 mGender = PetContract.PetEntry.GENDER_UNKNOWN;
             }
         });
+
+        GENDER_UNKNOWN_INDEX = genderSpinnerAdapter.getPosition(getResources().getString(R.string.gender_unknown));
+        GENDER_MALE_INDEX = genderSpinnerAdapter.getPosition(getResources().getString(R.string.gender_male));
+        GENDER_FEMALE_INDEX = genderSpinnerAdapter.getPosition(getResources().getString(R.string.gender_female));
     }
 
     @Override
@@ -131,7 +189,7 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                insertPet();
+                proceedWithData();
                 finish();
                 return true;
             // Respond to a click on the "Delete" menu option
@@ -148,13 +206,22 @@ public class EditorActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void deletePet() {
-        // TODO
+    private void proceedWithData() {
+        try {
+            if (purpose == INSERT) {
+                getContentResolver().insert(givenUri, createPet().createContentValues());
+            } else {
+                getContentResolver().update(givenUri, createPet().createContentValues(), null, null);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private void insertPet() {
+    private void deletePet() {
         try {
-            getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, createPet().createContentValues());
+            getContentResolver().delete(givenUri, null, null);
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
