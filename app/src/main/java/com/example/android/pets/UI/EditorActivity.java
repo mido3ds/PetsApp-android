@@ -103,18 +103,26 @@ public class EditorActivity extends AppCompatActivity {
 
     private void addTextChangedListeners() {
         TextWatcher watcher = new TextWatcher() {
+            CharSequence old;
+
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                old = charSequence;
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // if they are not equal then it has changed
+                fieldsChanged = fieldsChanged ? fieldsChanged : !charSequence.toString().contentEquals(old);
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                EditorActivity.this.fieldsChanged = true;
+                if (fieldsChanged) {
+                    mNameEditText.removeTextChangedListener(this);
+                    mBreedEditText.removeTextChangedListener(this);
+                    mWeightEditText.removeTextChangedListener(this);
+                }
             }
         };
         mNameEditText.addTextChangedListener(watcher);
@@ -203,7 +211,6 @@ public class EditorActivity extends AppCompatActivity {
                         mGender = PetContract.PetEntry.GENDER_UNKNOWN;
                     }
                 }
-                EditorActivity.this.fieldsChanged = true;
             }
 
             // Because AdapterView is an abstract class, onNothingSelected must be defined
