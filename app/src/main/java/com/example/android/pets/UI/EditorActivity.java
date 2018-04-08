@@ -110,12 +110,11 @@ public class EditorActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                EditorActivity.this.fieldsChanged = true;
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-
+                EditorActivity.this.fieldsChanged = true;
             }
         };
         mNameEditText.addTextChangedListener(watcher);
@@ -225,6 +224,16 @@ public class EditorActivity extends AppCompatActivity {
         // This adds menu items to the app bar.
         getMenuInflater().inflate(R.menu.menu_editor, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (purpose == INSERT) {
+            // disable delete
+            MenuItem item = menu.findItem(R.id.action_delete);
+            item.setVisible(false);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
