@@ -15,12 +15,16 @@
  */
 package com.example.android.pets.UI;
 
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,6 +53,7 @@ public class EditorActivity extends AppCompatActivity {
     private static int GENDER_FEMALE_INDEX;
     private int purpose;
     private Uri givenUri;
+    private Boolean fieldsChanged = false;
     /**
      * EditText field to enter the pet's name
      */
@@ -87,12 +92,35 @@ public class EditorActivity extends AppCompatActivity {
         mGenderSpinner = findViewById(R.id.spinner_gender);
 
         setupSpinner();
+        addTextChangedListeners();
         try {
             setupActivity(getIntent().getExtras());
         } catch (Exception e) {
             Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             finish();
         }
+    }
+
+    private void addTextChangedListeners() {
+        TextWatcher watcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                EditorActivity.this.fieldsChanged = true;
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        };
+        mNameEditText.addTextChangedListener(watcher);
+        mBreedEditText.addTextChangedListener(watcher);
+        mWeightEditText.addTextChangedListener(watcher);
     }
 
     private void setupActivity(Bundle extras) throws Exception {
@@ -128,11 +156,14 @@ public class EditorActivity extends AppCompatActivity {
         mBreedEditText.setText(pet.getBreed());
         mWeightEditText.setText(String.valueOf(pet.getWeight()));
 
-        int position = getPositionInSpinner(pet.getGender());
+        int position = getGendersPositionInSpinner(pet.getGender());
         mGenderSpinner.setSelection(position);
+
+        // user really did change nothing
+        fieldsChanged = false;
     }
 
-    private int getPositionInSpinner(int gender) {
+    private int getGendersPositionInSpinner(int gender) {
         switch (gender) {
             case PetContract.PetEntry.GENDER_UNKNOWN:
                 return GENDER_UNKNOWN_INDEX;
@@ -173,6 +204,7 @@ public class EditorActivity extends AppCompatActivity {
                         mGender = PetContract.PetEntry.GENDER_UNKNOWN;
                     }
                 }
+                EditorActivity.this.fieldsChanged = true;
             }
 
             // Because AdapterView is an abstract class, onNothingSelected must be defined
@@ -219,8 +251,32 @@ public class EditorActivity extends AppCompatActivity {
 
     @Override
     public void finish() {
-        super.finish();
-        overridePendingTransition(0, android.R.anim.slide_out_right);
+        if (!fieldsChanged) {
+            super.finish();
+            overridePendingTransition(0, android.R.anim.slide_out_right);
+        } else {
+            showExitAlert();
+        }
+    }
+
+    private void showExitAlert() {
+        new AlertDialog.Builder(this)
+                .setTitle("Discard your changes and quit editing?")
+                .setPositiveButton("KEEP EDITING", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // do nothing
+                    }
+                })
+                .setNegativeButton("DISCARD", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        EditorActivity.this.fieldsChanged = false; // like nothing happened
+                        EditorActivity.this.finish();
+                    }
+                })
+                .create()
+                .show();
     }
 
     private void proceedWithData() {
